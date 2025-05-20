@@ -1,0 +1,56 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Modul Setup API: Node.js + Sequelize</title>
+  <style>
+    body { font-family: sans-serif; margin: 40px; line-height: 1.6; }
+    h1, h2 { color: #2c3e50; }
+    pre { background: #f4f4f4; padding: 10px; border-radius: 5px; overflow-x: auto; }
+    code { font-family: Consolas, monospace; }
+  </style>
+</head>
+<body>
+
+<h1>Modul Setup API: Node.js + Sequelize</h1>
+
+<h2>📦 1. Clone Project Backend</h2>
+<pre><code>git clone https://github.com/AgungA142/test-be.git
+cd test-be</code></pre>
+
+<h2>🛠 2. Install Dependencies</h2>
+<pre><code>npm install</code></pre>
+
+<h2>⚙️ 3. Konfigurasi File <code>.env</code></h2>
+<p>Buat file <code>.env</code> di dalam folder <code>test-be</code> dan isi seperti berikut:</p>
+<pre><code>PORT=3000
+NODE_ENV=development
+
+DB_HOST=localhost
+DB_USERNAME=root
+DB_PASSWORD=
+DB_DATABASE=test
+DB_DIALECT=mysql
+DB_PORT=3306
+DB_LOGS=false
+DB_TIMEZONE=+07:00
+
+BASE_URL=http://localhost:3000</code></pre>
+
+<h2>🧬 4. Migrasi Database</h2>
+<p>Pastikan MySQL aktif dan database <code>test</code> sudah dibuat, lalu jalankan:</p>
+<pre><code>npx sequelize-cli db:migrate</code></pre>
+
+<h2>▶️ 5. Jalankan Server</h2>
+<pre><code>npm run dev</code></pre>
+
+<h2>📌 Catatan Tambahan</h2>
+<ul>
+  <li>Gunakan <code>Postman</code> untuk menguji endpoint.</li>
+  <li>Endpoint berjalan di <code>http://localhost:3000</code></li>
+  <li>Pastikan environment sesuai kebutuhan development.</li>
+</ul>
+
+</body>
+</html>

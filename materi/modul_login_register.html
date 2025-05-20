@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="id">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Modul Login & Register Jetpack Compose</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 40px;
+        line-height: 1.6;
+      }
+      h1,
+      h2 {
+        color: #2c3e50;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 10px;
+        border-radius: 5px;
+        overflow-x: auto;
+      }
+      code {
+        font-family: Consolas, monospace;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Modul: Login & Register dengan Jetpack Compose dan API</h1>
+
+    <h2>🎯 Tujuan</h2>
+    <ul>
+      <li>Membuat antarmuka login dan register dengan Jetpack Compose</li>
+      <li>Mengirim dan menerima data dari API menggunakan Retrofit</li>
+      <li>Mengelola status login menggunakan ViewModel & State</li>
+      <li>Menangani error dan loading state</li>
+    </ul>
+
+    <h2>🧩 Struktur Proyek</h2>
+    <pre><code>com.example.authapp
+├── data
+│   ├── model
+│   └── network
+├── ui
+│   ├── screen
+│   └── theme
+├── viewmodel
+└── MainActivity.kt</code></pre>
+
+    <h2>⚙️ Dependencies</h2>
+    <p>Tambahkan ke <code>build.gradle(:app)</code>:</p>
+    <pre><code>implementation "androidx.compose.ui:ui:1.6.0"
+implementation "androidx.compose.material3:material3:1.2.0"
+implementation "androidx.navigation:navigation-compose:2.6.0"
+implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2"
+implementation "com.squareup.retrofit2:retrofit:2.9.0"
+implementation "com.squareup.retrofit2:converter-gson:2.9.0"
+implementation "com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.11"</code></pre>
+
+    <h2>🌐 Setup Retrofit</h2>
+
+    <h3>ApiService.kt</h3>
+    <pre><code>interface ApiService {
+    @POST("login")
+    suspend fun login(@Body request: LoginRequest): LoginResponse
+
+    @POST("register")
+    suspend fun register(@Body request: RegisterRequest): RegisterResponse
+}</code></pre>
+
+    <h3>RetrofitClient.kt</h3>
+    <pre><code>object RetrofitClient {
+    private const val BASE_URL = "https://yourapi.com/api/"
+
+    private val logging = HttpLoggingInterceptor().apply {
+        level = HttpLoggingInterceptor.Level.BODY
+    }
+
+    private val client = OkHttpClient.Builder()
+        .addInterceptor(logging)
+        .build()
+
+    val api: ApiService = Retrofit.Builder()
+        .baseUrl(BASE_URL)
+        .client(client)
+        .addConverterFactory(GsonConverterFactory.create())
+        .build()
+        .create(ApiService::class.java)
+}</code></pre>
+
+    <h2>📦 Model Data</h2>
+
+    <h3>AuthRequest.kt</h3>
+    <pre><code>data class LoginRequest(val email: String, val password: String)
+data class RegisterRequest(val name: String, val email: String, val password: String)</code></pre>
+
+    <h3>AuthResponse.kt</h3>
+    <pre><code>data class LoginResponse(val token: String, val user: User)
+data class RegisterResponse(val message: String)
+data class User(val id: Int, val name: String, val email: String)</code></pre>
+
+    <h2>🧠 ViewModel</h2>
+
+    <h3>AuthViewModel.kt</h3>
+    <pre><code>class AuthViewModel : ViewModel() {
+    var loginState by mutableStateOf&lt;Result&lt;LoginResponse&gt;?&gt;(null)
+    var registerState by mutableStateOf&lt;Result&lt;RegisterResponse&gt;?&gt;(null)
+
+    fun login(email: String, password: String) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.api.login(LoginRequest(email, password))
+                loginState = Result.success(response)
+            } catch (e: Exception) {
+                loginState = Result.failure(e)
+            }
+        }
+    }
+
+    fun register(name: String, email: String, password: String) {
+        viewModelScope.launch {
+            try {
+                val response = RetrofitClient.api.register(RegisterRequest(name, email, password))
+                registerState = Result.success(response)
+            } catch (e: Exception) {
+                registerState = Result.failure(e)
+            }
+        }
+    }
+}</code></pre>
+
+    <h2>🎨 UI: Login & Register</h2>
+
+    <h3>LoginScreen.kt</h3>
+    <pre><code>@Composable
+fun LoginScreen(viewModel: AuthViewModel, onSuccess: () -> Unit) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
+        TextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation())
+        Button(onClick = { viewModel.login(email, password) }) {
+            Text("Login")
+        }
+
+        when (val state = viewModel.loginState) {
+            is Result.Success -> {
+                LaunchedEffect(Unit) { onSuccess() }
+            }
+            is Result.Failure -> {
+                Text("Login gagal: ${state.exception.message}", color = Color.Red)
+            }
+            else -> {}
+        }
+    }
+}</code></pre>
+
+    <h3>RegisterScreen.kt</h3>
+    <pre><code>@Composable
+fun RegisterScreen(viewModel: AuthViewModel, onRegistered: () -> Unit) {
+    var name by remember { mutableStateOf("") }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    Column(modifier = Modifier.padding(16.dp)) {
+        TextField(value = name, onValueChange = { name = it }, label = { Text("Nama") })
+        TextField(value = email, onValueChange = { email = it }, label = { Text("Email") })
+        TextField(value = password, onValueChange = { password = it }, label = { Text("Password") }, visualTransformation = PasswordVisualTransformation())
+        Button(onClick = { viewModel.register(name, email, password) }) {
+            Text("Register")
+        }
+
+        when (val state = viewModel.registerState) {
+            is Result.Success -> {
+                Text("Registrasi berhasil", color = Color.Green)
+                LaunchedEffect(Unit) { onRegistered() }
+            }
+            is Result.Failure -> {
+                Text("Register gagal: ${state.exception.message}", color = Color.Red)
+            }
+            else -> {}
+        }
+    }
+}</code></pre>
+
+    <h2>🧭 Navigasi</h2>
+    <pre><code>NavHost(navController, startDestination = "login") {
+    composable("login") {
+        LoginScreen(viewModel, onSuccess = { navController.navigate("home") })
+    }
+    composable("register") {
+        RegisterScreen(viewModel, onRegistered = { navController.navigate("login") })
+    }
+    composable("home") {
+        Text("Selamat Datang!")
+    }
+}</code></pre>
+
+    <h2>📌 Penutup</h2>
+    <ul>
+      <li>Pastikan API endpoint aktif dan bisa menerima request JSON</li>
+      <li>Gunakan Postman untuk pengujian awal endpoint</li>
+      <li>
+        Tambahkan permission <code>INTERNET</code> di
+        <code>AndroidManifest.xml</code>
+      </li>
+    </ul>
+  </body>
+</html>

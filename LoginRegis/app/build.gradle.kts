@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.sesi4_jetpackcompose"
+    namespace = "com.example.loginregis"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "com.example.sesi4_jetpackcompose"
+        applicationId = "com.example.loginregis"
         minSdk = 24
         targetSdk = 35
         versionCode = 1
@@ -56,9 +56,11 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
-
-    // Retrofit
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-// Retrofit with Scalar Converter
-    implementation("com.squareup.retrofit2:converter-scalars:2.9.0")
+    implementation ("androidx.compose.ui:ui:1.6.0")
+    implementation ("androidx.compose.material3:material3:1.2.0")
+    implementation ("androidx.navigation:navigation-compose:2.6.0")
+    implementation ("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation ("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation ("com.squareup.okhttp3:logging-interceptor:5.0.0-alpha.11")
 }
